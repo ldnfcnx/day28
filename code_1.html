@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">    
+    <title>IFE ECMAScript</title>
+    <style>
+    *{
+        padding: 0;
+    }
+    #email-sug-wrapper{
+        background-color: #fff;
+        border:1px solid #eee; 
+        width: 173px;
+        display: none;
+        margin-top: 0;
+    }
+    #email-sug-wrapper>li{
+        list-style: none;
+        color: #848484;
+        width: 100%;
+    }
+    #email-sug-wrapper>li:hover{
+        background-color: #09f;
+    }
+    .active{
+        background-color: #f90;
+    }
+    </style>
+<body>
+    <div class="wrapper">
+        <input id="email-input" type="text">
+        <ul id="email-sug-wrapper" class="email-sug"></ul>
+    </div>
+    <script>
+    var postfixList = ['163.com', 'gmail.com', '126.com', 'qq.com', '263.net'];
+        input=document.getElementById("email-input");
+        ul=document.getElementById("email-sug-wrapper" );
+
+        window.onload=function(){
+            input.focus();
+        }
+
+        input.onblur=function(){    //失去焦点关闭提示
+            setTimeout(function(){
+                ul.innerHTML="";
+            },100) ;
+        }
+
+        input.onfocus=function(){   //获得焦点出现提示
+            toggleHint();
+            var val=getValue();
+            createHint(val);
+        }
+
+        input.addEventListener('keyup',function(e){
+            var active;
+            if(e.keyCode!=13&&e.keyCode!=38&&e.keyCode!=40&&e.keyCode!=27){
+                toggleHint();
+                var val=getValue();
+                createHint(val);
+            }else if(e.keyCode==40){      //按下键
+                active=document.querySelector(".active");
+                if(active.parentNode.lastChild==active){      
+                    active.parentNode.firstChild.className="active";
+                    active.className="";
+                }else{
+                    active.nextSibling.className="active";
+                    active.className="";
+                }
+            }else if(e.keyCode==38){    //按上
+                active=document.querySelector(".active");
+                if(active.parentNode.firstChild==active){
+                    active.parentNode.lastChild.className="active";
+                    active.className="";
+                }else{
+                    active.previousElementSibling.className="active";
+                    active.className="";
+                }
+            }else if(e.keyCode==13){   //按 enter
+                v=document.querySelector(".active").innerHTML;
+                v = v.replace(/&lt;/g,"<");
+                v = v.replace(/&gt;/g,">");
+                input.value=v;
+                ul.style.display="none";
+            }else if(e.keyCode==27){  //按 esc
+                this.select()
+            }
+        })
+        ul.addEventListener("click",function(e){    //提示点击事件
+            if(e.target&&e.target.nodeName.toUpperCase()=="LI"){
+                v=e.target.innerHTML;
+                v = v.replace(/&lt;/g,"<");
+                v = v.replace(/&gt;/g,">");
+                input.value=v;
+                input.focus();
+                ul.style.display="none";
+            }
+        })
+
+        function getValue(){           //获取并转义邮箱地址
+            var val=input.value;
+                  v= val.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, ''); //trim
+                  v = v.replace(/</g,"&lt;");
+                  v = v.replace(/>/g,"&gt;");
+            return v;
+        }
+        function createHint(val){     //生成提示
+            ul.innerHTML="";
+            if(val.indexOf("@")!=-1){
+                var val1=val.slice(val.indexOf("@")+1);
+                    val=val.slice(0,val.indexOf("@"));           
+            }
+            for(var i=0;i<postfixList.length;i++){
+                if(!val1||val1==""||postfixList.join("").indexOf(val1)==-1){
+                    var li=document.createElement("li");
+                    li.innerHTML=val+"@"+postfixList[i];
+                    if(ul.innerHTML==""){
+                        li.className="active";
+                    }
+                    ul.append(li); 
+                }else if(postfixList[i].indexOf(val1)!=-1){
+                    var li=document.createElement("li");
+                    li.innerHTML=val+"@"+postfixList[i];
+                    if(ul.innerHTML==""){
+                        li.className="active";
+                    }
+                    ul.append(li);
+                }            
+             }
+        }
+        function toggleHint(){     //检验input是否为空
+            if(getValue()==""){
+                ul.style.display="none";
+            }else{
+                ul.style.display="block"
+            }
+        }
+    </script>    
+</body>
+</html>
